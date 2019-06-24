@@ -1,0 +1,8 @@
+peb2302_name="Ark Unit Cannon"
+peb2302_desc="Strategic Balistic Unit Delivery System"
+peb2302_help="Strategic Balistic Unit Delivery System"
+ability_unitcannon="Unit Cannon"
+pcb4302_name="Boomerang"
+pcb4302_desc="Strategic Defense System"
+pcb4302_help="Strateigc Defense System"
+ability_nukeredirect="Stratigic Missile Reflection"
