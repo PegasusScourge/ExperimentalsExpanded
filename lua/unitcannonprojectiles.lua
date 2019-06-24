@@ -22,7 +22,7 @@ local Explosion = import('/lua/defaultexplosions.lua')
 local DepthCharge = import('/lua/defaultantiprojectile.lua').DepthCharge
 local util = import('/lua/utilities.lua')
 
-local EffectTemplate = import('/mods/TheArkCannon/lua/ArkEffectTemplates.lua')
+local EffectTemplate = import('/mods/ExperimentalsExpanded/lua/ArkEffectTemplates.lua')
 
 #------------------------------------------------------------------------
 #  PROJECTILES

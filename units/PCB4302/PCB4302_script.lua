@@ -118,40 +118,70 @@ local StrategicMissileRedirect = Class(Entity)
 				proj:ForkThread(function()
 					local projPos = proj:GetPosition()
 					local launcherPos = launcher:GetPosition()
+					local launcherAbove = launcherPos
 					
 					local flightHeight = 100
 					
 					-- configure the target points
 					local flightPath = projPos
 					flightPath[2] = GetSurfaceHeight(projPos[1], projPos[3]) + flightHeight
-					launcherPos[2] = GetSurfaceHeight(launcherPos[1], launcherPos[3])
+					launcherAbove[2] = GetSurfaceHeight(launcherPos[1], launcherPos[3]) + flightHeight
+					
+					if launcherPos[1] < projPos[1] then
+						flightPath[1] = flightPath[1] - 20
+					else
+						flightPath[1] = flightPath[1] + 20
+					end
+					if launcherPos[3] < projPos[3] then
+						flightPath[3] = flightPath[3] - 20
+					else
+						flightPath[3] = flightPath[3] + 20
+					end
+
 
 					LOG('DEBUG projectile pos ' .. projPos[1] .. ' ' .. projPos[2] .. ' ' .. projPos[3])
 					LOG('DEBUG flightpath ' .. flightPath[1] .. ' ' .. flightPath[2] .. ' ' .. flightPath[3])
 					LOG('DEBUG launcherpos ' .. launcherPos[1] .. ' ' .. launcherPos[2] .. ' ' .. launcherPos[3] .. ' w/flightpath height as cruise tgt')
 
-					proj:SetLifetime(60)
+					proj:SetLifetime(120)
 					proj:SetCollideSurface(true)
-					proj:SetTurnRate(50)
+					
 					proj:SetNewTargetGround(flightPath)
+					if proj.MoveThread then
+						KillThread(proj.MoveThread)
+						proj.MoveThread = nil
+						print('Caught NUKE GUIDANCE THREAD')
+					end
+					
+					proj:SetTurnRate(47.52)
 					proj:TrackTarget(true)
 					
 					print('Boomerang: ascent phase')
 					WaitSeconds(4)
 					
-					print('Boomerang: cruise phase')
-					proj:SetNewTargetGround(launcherPos)
-					proj:TrackTarget(true)
-
+					
+					print('Boomerang: cruise phase, tgt height ' .. flightHeight)
+					proj:SetNewTargetGround(launcherAbove)
 					proj:SetTurnRate(47.52)
-					WaitSeconds(2.5)
-					proj:SetTurnRate(0)
+					proj:TrackTarget(true)
 					
 					while not proj:BeenDestroyed() do
-						if proj:GetDistanceToTarget() < 32 then
-							proj:SetTurnRate(50)
+						
+						if proj.MoveThread then
+							KillThread(proj.MoveThread)
+							proj.MoveThread = nil
+							print('Caught NUKE GUIDANCE THREAD')
 						end
-						WaitSeconds(1)
+						
+						if proj:GetDistanceToTarget() < 32 then
+							proj:SetNewTargetGround(launcherPos)
+							WaitSeconds(1)
+							proj:SetTurnRate(47.52)
+						else
+							proj:SetNewTargetGround(launcherAbove)
+							WaitSeconds(0.25)
+							proj:SetTurnRate(55)
+						end
 					end
 				end)
 			end

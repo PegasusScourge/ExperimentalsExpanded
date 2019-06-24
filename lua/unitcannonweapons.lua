@@ -11,7 +11,7 @@
 local WeaponFile = import('/lua/sim/DefaultWeapons.lua')
 local DefaultProjectileWeapon = WeaponFile.DefaultProjectileWeapon
 
-local EffectTemplate = import('/mods/TheArkCannon/lua/ArkEffectTemplates.lua')
+local EffectTemplate = import('/mods/ExperimentalsExpanded/lua/ArkEffectTemplates.lua')
 
 local Weapon = import('/lua/sim/Weapon.lua').Weapon
 
