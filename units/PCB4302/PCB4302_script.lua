@@ -1,9 +1,9 @@
 #****************************************************************************
 #**
-#**  File     :  /cdimage/units/URB4302/URB4302_script.lua
-#**  Author(s):  John Comes, David Tomandl, Jessica St. Croix
+#**  File     :  /mods/ExperimentalsExpanded/units/PCB4302/PCB4302_script.lua
+#**  Author(s):  PegasusScourge
 #**
-#**  Summary  :  Cybran Strategic Missile Defense Script
+#**  Summary  :  Cybran Strategic Missile Reflection Script
 #**
 #**  Copyright © 2005 Gas Powered Games, Inc.  All rights reserved.
 #****************************************************************************
@@ -70,10 +70,6 @@ local StrategicMissileRedirect = Class(Entity)
         Main = function(self)
         end,
     },
-	
-	MissileGuidance = function(proj, launcher)
-		
-	end,
 
 	RedirectingState = State{
 		Main = function(self)

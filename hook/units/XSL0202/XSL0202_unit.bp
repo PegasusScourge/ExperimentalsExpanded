@@ -1,0 +1,11 @@
+UnitBlueprint {
+	BlueprintId="xsl0202",Merge=true,
+    MicroTeleporter = {
+		Range = 90,
+	},
+	Economy = {
+		TeleportMassMod = 0,
+		TeleportEnergyMod = 1.2,
+		TeleportTimeMod = 0.002,
+	}
+}
