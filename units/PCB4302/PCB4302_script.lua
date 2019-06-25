@@ -50,6 +50,7 @@ local StrategicMissileRedirect = Class(Entity)
         self:SetDrawScale(self.Radius)
         self.AttachBone = spec.AttachBone
         self:AttachTo(spec.Owner, spec.AttachBone)
+		
         ChangeState(self, self.WaitingState)
         #LOG('*DEBUG MISSILEREDIRECT DONE BEING CREATED')
     end,
@@ -73,6 +74,13 @@ local StrategicMissileRedirect = Class(Entity)
 
 	RedirectingState = State{
 		Main = function(self)
+			-- redirect if we have enough power, else don'table
+			print('Attempting redirect, canRedirect: ' .. string.format("%s", tostring(self.Owner.CanRedirect)))
+			if not self.Owner.CanRedirect then
+				ChangeState(self, self.WaitingState)
+				return
+			end
+		
 			if not self or self:BeenDestroyed() or
 			   not self.EnemyProj or self.EnemyProj:BeenDestroyed() or
 			   not self.Owner or self.Owner.Dead then
@@ -209,7 +217,11 @@ PCB4302 = Class(CStructureUnit) {
             RedirectRateOfFire = bp.RedirectRateOfFire
         }
         self.Trash:Add(antiMissile)
-		self:SetConsumptionPerSecondEnergy(self:GetBlueprint().Economy.MaintenanceConsumptionPerSecondEnergy)
+		
+		-- start drain thread
+		self:SetMaintenanceConsumptionActive()
+		self:ForkThread(self.WatchEconomyThread)
+		
         self.UnitComplete = true
 		
 		#LOG('Entity members:')
@@ -217,6 +229,31 @@ PCB4302 = Class(CStructureUnit) {
 		#	LOG("found member " .. key);
 		#end
     end,
+	
+	#EconomyDrainThread = function(self, drainAmount)
+	#	local event = CreateEconomyEvent(self, drainAmount, 0, 1)
+	#	while not self:BeenDestroyed() do
+	#		if EconomyEventIsDone(event) then
+	#			event = nil
+	#			event = CreateEconomyEvent(self, drainAmount, 0, 1)
+	#		end
+	#			
+	#		WaitSeconds(1)
+	#	end
+	#end,
+	
+	WatchEconomyThread = function(self)
+		while not self:BeenDestroyed() do
+			WaitSeconds(0.5)
+			self.CanRedirect = true
+			local fraction = self:GetResourceConsumed()
+			while fraction == 1 do
+				WaitSeconds(0.5)
+				fraction = self:GetResourceConsumed()
+			end
+			self.CanRedirect = false
+		end
+	end,
 }
 
 TypeClass = PCB4302

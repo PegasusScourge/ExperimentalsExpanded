@@ -43,15 +43,14 @@ MicroTeleporter = Class(BasicEquipment)
 		
 		-- Give our parent unit the teleport capability
 		self.Owner:AddCommandCap('RULEUCC_Teleport')
-		
-		ChangeState(self, self.IdleState)
 	end,
 	
 	InterceptTeleport = function(self, teleporter, location, orientation)
-		#print('Teleporter intercepted, to (' .. location[1] .. ',' .. location[2] .. ',' .. location[3] .. ')')
-		
 		-- get the location of the unit teleporting
 		local teleporterLocation = teleporter:GetPosition()
+		location[2] = teleporterLocation[2] -- put ourselves on a level playing field for all intents and purposes. For some reason the 2D distance calc sometimes takes this into effect???
+		
+		#print('Teleporter intercepted, to (' .. location[1] .. ',' .. location[2] .. ',' .. location[3] .. ')')
 		#print('Teleporter intercepted, from (' .. teleporterLocation[1] .. ',' .. teleporterLocation[2] .. ',' .. teleporterLocation[3] .. ')')
 		
 		-- check if the distance is within the allowed teleport range
@@ -60,18 +59,8 @@ MicroTeleporter = Class(BasicEquipment)
 		if dist < self.TeleportRange then 
 			return true
 		end
-		#print('Unable to teleport. Out of range. (Range: ' .. self.TeleportRange .. ')')
+		#print('Unable to teleport. ' .. math.round(dist) .. ' out of range. (Range: ' .. self.TeleportRange .. ')')
 		return false
 	end,
-	
-	
-	-- STATES
-	
-	-- IdleState just waits for a teleporter command to be given
-	IdleState = State{
-	
-		
-	
-	},
 
 }
