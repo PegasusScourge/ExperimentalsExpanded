@@ -39,11 +39,14 @@ PEB2302 = Class(TStructureUnit) {
 	
 	OnStopBeingBuilt = function(self,builder,layer)
 		TStructureUnit.OnStopBeingBuilt(self,builder,layer)
-        ChangeState(self, self.IdleState)
+		
 		self.SetWeaponEnabledByLabel(self, 'MainGun', false)
 		
 		self:ForkThread(self.UpdateCannonThread)
 		-- self.Trash:Add(self.UpdateCannonThread)
+		
+		
+		ChangeState(self, self.IdleState)
     end,
 
     OnFailedToBuild = function(self,builder,layer)
@@ -55,6 +58,7 @@ PEB2302 = Class(TStructureUnit) {
 	# Checks if we have units to fire, if we do we enable the weapon
 	UpdateCannonThread = function(self)
 		local MainG = self.GetWeaponByLabel(self, 'MainGun')
+		local weaponEnabled = false
 		
 		while true do
 			WaitSeconds(0.2)
@@ -62,8 +66,15 @@ PEB2302 = Class(TStructureUnit) {
 			#print("number of units: ", numu)
 			if numu > 0 then
 				self.SetWeaponEnabledByLabel(self, 'MainGun', true)
+				weaponEnabled = true
 			else
 				self.SetWeaponEnabledByLabel(self, 'MainGun', false)
+				
+				-- check to see if weapon was enabled, and issue a stop command to reset the unit
+				if weaponEnabled then
+					IssueClearCommands({self})
+					weaponEnabled = false
+				end
 			end
 			
 			MainG:UpdateHooksUsed(MainG)
@@ -77,6 +88,7 @@ PEB2302 = Class(TStructureUnit) {
 				end
 				self.WeaponHookSpace = hooksLeft
 			else
+				-- there are no more hooks left, so we 
 				self.WeaponHasUnitSpace = false
 			end
 		end
@@ -130,6 +142,8 @@ PEB2302 = Class(TStructureUnit) {
 				self:SetProductionActive(false)
 				self:AddBuildRestriction(categories.ALLUNITS)
 				self:RequestRefreshUI()
+				-- issue a stop command to prevent building further, plus resetting the unit for firing
+				IssueStop({self})
 			end
 			#if nextHookUse < MainG:GetMaxNumberOfHooks(MainG) then
 			#	self:SetProductionActive(true)

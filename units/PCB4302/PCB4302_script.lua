@@ -75,7 +75,7 @@ local StrategicMissileRedirect = Class(Entity)
 	RedirectingState = State{
 		Main = function(self)
 			-- redirect if we have enough power, else don'table
-			print('Attempting redirect, canRedirect: ' .. string.format("%s", tostring(self.Owner.CanRedirect)))
+			#print('Attempting redirect, canRedirect: ' .. string.format("%s", tostring(self.Owner.CanRedirect)))
 			if not self.Owner.CanRedirect then
 				ChangeState(self, self.WaitingState)
 				return
@@ -154,17 +154,17 @@ local StrategicMissileRedirect = Class(Entity)
 					if proj.MoveThread then
 						KillThread(proj.MoveThread)
 						proj.MoveThread = nil
-						print('Caught NUKE GUIDANCE THREAD')
+						#print('Caught NUKE GUIDANCE THREAD')
 					end
 					
 					proj:SetTurnRate(47.52)
 					proj:TrackTarget(true)
 					
-					print('Boomerang: ascent phase')
+					#print('Boomerang: ascent phase')
 					WaitSeconds(4)
 					
 					
-					print('Boomerang: cruise phase, tgt height ' .. flightHeight)
+					#print('Boomerang: cruise phase, tgt height ' .. flightHeight)
 					proj:SetNewTargetGround(launcherAbove)
 					proj:SetTurnRate(47.52)
 					proj:TrackTarget(true)
@@ -174,10 +174,10 @@ local StrategicMissileRedirect = Class(Entity)
 						if proj.MoveThread then
 							KillThread(proj.MoveThread)
 							proj.MoveThread = nil
-							print('Caught NUKE GUIDANCE THREAD')
+							#print('Caught NUKE GUIDANCE THREAD')
 						end
 						
-						if proj:GetDistanceToTarget() < 32 then
+						if proj:GetDistanceToTarget() < 40 then
 							proj:SetNewTargetGround(launcherPos)
 							WaitSeconds(1)
 							proj:SetTurnRate(47.52)

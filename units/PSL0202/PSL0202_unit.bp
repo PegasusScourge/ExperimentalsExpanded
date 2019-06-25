@@ -69,6 +69,10 @@ UnitBlueprint {
     },
     Description = '<LOC psl0202_desc>Minor Experimental Assault Bot',
     Display = {
+		Abilities = {
+            '<LOC ability_teleport>Teleport',
+			'<LOC ability_massive>Massive',
+        },
         AnimationDeath = {
             {
                 Animation = '/mods/ExperimentalsExpanded/units/PSL0202/PSL0202_ADeath.sca',
@@ -136,23 +140,24 @@ UnitBlueprint {
                     },
                 },
             },
-			TeleportEffects = {
-				ChargeFxAtUnitBones = {
-					{
-						Bone = 'Right_Leg_B01',
-						Offset = {
-							0,
-							0,
-							-0.1,
-						},
+        },
+		TeleportEffects = {
+			ChargeFxAtUnitBones = {
+				{
+					Bone = 'Torso',
+					Offset = {
+						0,
+						0,
+						-0.1,
 					},
 				},
-				PlayChargeFxAtDestination = true,
-				PlayChargeFxAtUnit = true,
-				PlayTeleportOutFx = true,
-				PlayTeleportInFx = true,
 			},
-        },
+			PlayChargeFxAtDestination = true,
+			PlayChargeFxAtUnit = true,
+			PlayTeleportOutFx = true,
+			PlayTeleportInFx = true,
+			FxChargeAtDestOffsetY = 1.8,
+		},
         PlaceholderMeshName = 'UXL0001',
         SpawnRandomRotation = true,
         TransportAnimation = {
@@ -246,11 +251,11 @@ UnitBlueprint {
     StrategicIconName = 'icon_experimental_generic',
     StrategicIconSortPriority = 125,
     Veteran = {
-        Level1 = 9,
-        Level2 = 18,
-        Level3 = 27,
-        Level4 = 35,
-        Level5 = 42,
+        Level1 = 10,
+        Level2 = 15,
+        Level3 = 20,
+        Level4 = 30,
+        Level5 = 40,
     },
     Weapon = {
         {
@@ -305,7 +310,7 @@ UnitBlueprint {
             RackSlavedToTurret = true,
             RangeCategory = 'UWRC_DirectFire',
             RateOfFire = 8,
-            TargetCheckInterval = 0.66,
+            TargetCheckInterval = 0.2,
             TargetPriorities = {
                 'SPECIALHIGHPRI',
                 'TECH1 MOBILE',
