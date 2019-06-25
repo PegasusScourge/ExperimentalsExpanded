@@ -6,16 +6,16 @@
 #**
 #**  Copyright © 2005 Gas Powered Games, Inc.  All rights reserved.
 #****************************************************************************
-#local SWalkingLandUnit = import('/lua/seraphimunits.lua').SWalkingLandUnit
+local SWalkingLandUnit = import('/lua/seraphimunits.lua').SWalkingLandUnit
 local MicroTeleporter = import ('/mods/ExperimentalsExpanded/lua/UnitEquipment.lua').MicroTeleporter
 #local SDFAireauBolterWeapon = import('/lua/seraphimweapons.lua').SDFAireauBolterWeapon02
 
 local originalXSL0202 = import('/units/XSL0202/XSL0202_script.lua').XSL0202
 
 XSL0202 = Class(originalXSL0202) {
-	#Weapons = {
-    #    MainGun = Class(SDFAireauBolterWeapon) {}
-    #},
+	Weapons = {
+        MainGun = Class(SDFAireauBolterWeapon) {},
+    },
 
 	OnStopBeingBuilt = function(self,builder,layer)
 		SWalkingLandUnit.OnStopBeingBuilt(self,builder,layer)
@@ -24,8 +24,8 @@ XSL0202 = Class(originalXSL0202) {
 		local bp = self:GetBlueprint().MicroTeleporter
 		self.Teleporter = MicroTeleporter {
 			Owner = self,
-			AttachBone = nil,
-			TeleportRange = 90,
+			AttachBone = bp.AttachBone,
+			TeleportRange = bp.Range,
 		}
 		self.Trash:Add(self.Teleporter)
 		
