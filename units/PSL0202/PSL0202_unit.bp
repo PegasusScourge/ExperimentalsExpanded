@@ -2,7 +2,6 @@ UnitBlueprint {
     MicroTeleporter = {
 		Range = 70,
 	},
-	
 	Audio = {
         AmbientMove = Sound {
             Bank = 'XSL',
@@ -54,6 +53,7 @@ UnitBlueprint {
 		'NEEDMOBILEBUILD',
         'BOT',
         'OVERLAYDIRECTFIRE',
+		'OVERLAYCOUNTERINTEL',
 		'CQUEMOV', --"CQUEMOV" enables the selection and move commands during construction
     },
     CollisionOffsetZ = 0,
@@ -210,6 +210,7 @@ UnitBlueprint {
     },
     Intel = {
         VisionRadius = 40,
+		CloakFieldRadius = 70,
     },
     Interface = {
         HelpText = '<LOC xsl0202_help>Minor Experimental Assault Bot',

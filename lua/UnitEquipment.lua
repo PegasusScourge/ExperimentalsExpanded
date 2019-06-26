@@ -10,6 +10,7 @@
 
 local Entity = import('/lua/sim/Entity.lua').Entity
 local Unit = import('/lua/sim/Unit.lua').Unit
+local EffectUtilities = import('/lua/EffectUtilities.lua')
 
 -- The basic equipment class, attaches to an object and stays there
 BasicEquipment = Class(Entity)
@@ -50,16 +51,21 @@ MicroTeleporter = Class(BasicEquipment)
 		local teleporterLocation = teleporter:GetPosition()
 		location[2] = teleporterLocation[2] -- put ourselves on a level playing field for all intents and purposes. For some reason the 2D distance calc sometimes takes this into effect???
 		
-		#print('Teleporter intercepted, to (' .. location[1] .. ',' .. location[2] .. ',' .. location[3] .. ')')
-		#print('Teleporter intercepted, from (' .. teleporterLocation[1] .. ',' .. teleporterLocation[2] .. ',' .. teleporterLocation[3] .. ')')
+		print('Teleporter intercepted, to (' .. location[1] .. ',' .. location[2] .. ',' .. location[3] .. ')')
+		print('Teleporter intercepted, from (' .. teleporterLocation[1] .. ',' .. teleporterLocation[2] .. ',' .. teleporterLocation[3] .. ')')
 		
 		-- check if the distance is within the allowed teleport range
-		local dist = VDist2(location[1], location[2], teleporterLocation[1], teleporterLocation[2])
+		local dist = VDist2(location[1], location[3], teleporterLocation[1], teleporterLocation[3])
+		
+		print('Teleport intercepted, dist = ' .. dist)
 		
 		if dist < self.TeleportRange then 
 			return true
 		end
 		#print('Unable to teleport. ' .. math.round(dist) .. ' out of range. (Range: ' .. self.TeleportRange .. ')')
+		
+		-- Can't tele, give a steam puff on the unit to demonstrate this
+		EffectUtilities.CreateTeleSteamFX(teleporter)
 		return false
 	end,
 

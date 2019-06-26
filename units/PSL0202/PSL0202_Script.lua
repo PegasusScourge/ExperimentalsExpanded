@@ -29,12 +29,18 @@ PSL0202 = Class(SWalkingLandUnit) {
 		}
 		self.Trash:Add(self.Teleporter)
 		
+		-- disabled the cloakfield, this is used to show the teleport range
+		-- idea and execution courtesy of Blackops Unleashed (Exavier Macbeth, lt_hawkeye, orangeknight - Revamped 2016 by IceDreamer)
+		self:DisableUnitIntel('unitScript', 'CloakField')
+		
 		self.UnitComplete = true
 	end,
 	
 	OnTeleportUnit = function(self, teleporter, location, orientation)
 		if self.Teleporter:InterceptTeleport(teleporter, location, orientation) then
 			SWalkingLandUnit.OnTeleportUnit(self, teleporter, location, orientation)
+		else
+			SWalkingLandUnit.OnFailedTeleport(self)
 		end
 	end,
 	
