@@ -169,6 +169,7 @@ local StrategicMissileRedirect = Class(Entity)
 					proj:SetTurnRate(47.52)
 					proj:TrackTarget(true)
 					
+					local finalApproach = false
 					while not proj:BeenDestroyed() do
 						
 						if proj.MoveThread then
@@ -177,9 +178,12 @@ local StrategicMissileRedirect = Class(Entity)
 							#print('Caught NUKE GUIDANCE THREAD')
 						end
 						
-						if proj:GetDistanceToTarget() < 40 then
+						if proj:GetDistanceToTarget() < 40 or finalApproach then
+							if not finalApproach then
+								finalApproach = true
+							end
 							proj:SetNewTargetGround(launcherPos)
-							WaitSeconds(1)
+							WaitSeconds(0.25)
 							proj:SetTurnRate(47.52)
 						else
 							proj:SetNewTargetGround(launcherAbove)
