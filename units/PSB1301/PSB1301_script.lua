@@ -47,6 +47,11 @@ PSB1301 = Class(SStructureUnit) {
 	BallSliderTeleportPosition = -42,
 	BallRotorTeleportSpeed = 100,
 	
+	firedBeams = {},
+	beamFx = {},
+	chargeEffects = {},
+	nearbyUnits = {},
+	
 	TeleportingUnits = false,
     
     OnStopBeingBuilt = function(self, builder, layer)
@@ -68,28 +73,44 @@ PSB1301 = Class(SStructureUnit) {
     end,
 	
 	OnTeleportUnit = function(self, teleporter, location, orientation)
-		self:ForkThread(self.TeleportUnitsThread, teleporter, location, orientation)
+		if self.TeleportingUnits then
+			-- we are already teleporting units! terminate the effects etc
+			self:ForceCancelTeleport()
+		else
+			self:ForkThread(self.TeleportUnitsThread, teleporter, location, orientation)
+		end
 		
 		#-- fail our own teleport just in case
 		#self.OnFailedTeleport(self)
 	end,
 	
+	OnKilled = function(self, instigator, type, overkillRatio)
+		-- cause the ball to fall to the ground
+		self.BallSlider:SetGoal(0, -5, 0)
+		self.BallSlider:SetSpeed(40)
+		
+		self:ForceCancelTeleport()
+		
+		SStructureUnit.OnKilled(self, instigator, type, overkillRatio)
+	end,
+	
 	TeleportUnitsThread = function(self, teleporter, location, orientation)
+		
 		local brain = self:GetAIBrain()
 		local bp = self:GetBlueprint()
 		local detectedUnits = brain:GetUnitsAroundPoint(categories.LAND, self:GetPosition(), bp.TeleportTower.TeleportRange)
 		
 		-- create a new unit list and reduce to allowed units
-		local nearbyUnits = {}
+		self.nearbyUnits = {}
 		for _,u in detectedUnits do
 			if IsUnit(u) then
-				if self:IsValidUnit(u) then
-					table.insert(nearbyUnits, u)
+				if self:IsValidUnit(u) and self:GetArmy() == u:GetArmy() then -- check for valid type and army of unit
+					table.insert(self.nearbyUnits, u)
 				end
 			end
 		end
 		
-		local numNearbyUnits = table.getn(nearbyUnits)
+		local numNearbyUnits = table.getn(self.nearbyUnits)
 		#print('Found ' .. numNearbyUnits .. ' units nearby')
 		
 		if numNearbyUnits == 0 then 
@@ -103,17 +124,16 @@ PSB1301 = Class(SStructureUnit) {
 		-- start the teleport noise
 		self:PlayUnitAmbientSound('TeleportWub')
 		
-		local chargeEffects = {}
 		-- create emitters and add to the bag
 		for _,v in self.STeleport do
 			local em = CreateEmitterAtEntity(self, army, v)
-			table.insert(chargeEffects, em)
+			table.insert(self.chargeEffects, em)
 		end
 		WaitSeconds(0.4)
 		-- create emitters again, for two layers
 		for _,v in self.TeleEffect do
 			local em = CreateEmitterAtEntity(self, army, v)
-			table.insert(chargeEffects, em)
+			table.insert(self.chargeEffects, em)
 		end
 		
 		-- speed up the orb and rise it
@@ -124,7 +144,7 @@ PSB1301 = Class(SStructureUnit) {
 			self.BallSlider:SetGoal(0, self.BallSliderTeleportPosition, 0)
 		end
 		
-		self:ForkThread(self.FireBeamsThread, nearbyUnits, self.FxBeam, self.FxBeamStartPoint, self.FxBeamEndPoint, 'Orb')
+		self:ForkThread(self.FireBeamsThread, self.nearbyUnits, self.FxBeam, self.FxBeamStartPoint, self.FxBeamEndPoint, 'Orb')
 		
 		LOG('Teleporter: to = (' .. location[1] .. ', ' .. location[2] .. ', ' .. location[3] .. ')')
 		LOG('Teleporter: orientation = (' .. orientation[1] .. ', ' .. orientation[2] .. ', ' .. orientation[3] .. ')')
@@ -132,7 +152,8 @@ PSB1301 = Class(SStructureUnit) {
 		
 		-- issue teleports for the units
 		local randomizedDif = 6.2
-		for _,unit in nearbyUnits do
+		for _,unit in self.nearbyUnits do
+			IssueClearCommands({unit})
 			LOG('Teleporting unit to ' .. (location[1] + util.GetRandomFloat(-randomizedDif, randomizedDif)) .. ', 0, ' .. (location[3] + util.GetRandomFloat(-5, 5)) .. ')')
 			unit:OnTeleportUnit(unit, {location[1] + util.GetRandomFloat(-randomizedDif, randomizedDif), 0 , location[3] + util.GetRandomFloat(-5, 5)}, orientation)
 		end
@@ -145,7 +166,7 @@ PSB1301 = Class(SStructureUnit) {
 		self.TeleportingUnits = false
 		
 		-- destroy emitters
-		self:DestroyEmitters(chargeEffects)
+		self:DestroyEmitters(self.chargeEffects)
 		
 		-- spin down the orb to normal speed and lower
 		if self.BallRotor then
@@ -158,6 +179,8 @@ PSB1301 = Class(SStructureUnit) {
 		-- stop the teleport noise
 		self:StopUnitAmbientSound('TeleportWub')
 	
+		-- clear unit list
+		self.nearbyUnits = {}
 	end,
 	
 	DestroyEmitters = function(self, emitters)
@@ -166,16 +189,31 @@ PSB1301 = Class(SStructureUnit) {
 		end
 	end,
 	
+	ForceCancelTeleport = function(self)
+		self:DestroyEmitters(self.firedBeams)
+		self:DestroyEmitters(self.beamFx)
+		self:DestroyEmitters(self.chargeEffects)
+		
+		-- nullify the teleport thread
+		self.TeleportingUnits = false
+		
+		-- stop units teleporting
+		for _,u in self.nearbyUnits do
+			if not u:BeenDestroyed() then
+				u:OnFailedTeleport()
+			end
+		end
+		self.nearbyUnits = {}
+	end,
+	
 	FireBeamsThread = function(self, units, fx, fxstart, fxend, startbone)
 		-- create the beams
 		local army = self:GetArmy()
-		local firedBeams = {}
 		
-		local beamFx = {}
 		-- create the start emission
 		for _,v in fxstart do
 			local em = CreateEmitterAtBone(self, startbone, army, v)
-			table.insert(beamFx, em)
+			table.insert(self.beamFx, em)
 		end
 	
 		#-- create the end emission
@@ -187,43 +225,63 @@ PSB1301 = Class(SStructureUnit) {
 		#end
 		
 		local unitsTeleporting = 0
-		local randTime = 0
+		
+		-- track the unit ids that are teleporting, so we can give them a correct sign off
+		local teleportingIDs = {}
 		
 		WaitSeconds(1)
 		
 		while self.TeleportingUnits do
 			unitsTeleporting = 0
 			for _,u in units do
+				local id = u:GetEntityId()
 				if not u:BeenDestroyed() and u.UnitBeingTeleported then
+					-- check to see if unit is already in teleport ids
+					if not teleportingIDs[id] then
+						teleportingIDs[id] = 1
+					end
+					
 					for _,v in fx do
 						local em = nil
-						if util.GetRandomInt(0,1) == 1 then
+						if util.GetRandomInt(0,2) == 1 then -- Randomly select 0, 1 or 2. 1/3rd of the time, the lightning bolt goes FROM the unit instead of TO. Just for fun visuals
 							em = CreateBeamEntityToEntity(u, nil, self, nil, army, v)
 						else
 							em = CreateBeamEntityToEntity(self, nil, u, nil, army, v)
 						end
-						table.insert(firedBeams, em)
+						table.insert(self.firedBeams, em)
 						unitsTeleporting = unitsTeleporting + 1
+					end
+				else
+					-- check to see if unit is in teleport ids
+					if teleportingIDs[id] ~= nil then
+						if teleportingIDs[id] == 1 then
+							teleportingIDs[id] = 0
+							
+							-- fire a farewell beam
+							for _,v in fx do
+								local em = CreateBeamEntityToEntity(self, nil, u, nil, army, v)
+								table.insert(self.firedBeams, em)
+							end
+							self:PlayUnitSound('TeleportSend')
+						end
 					end
 				end
 			end
-			
-			randTime = util.GetRandomFloat(0.5,2)
 			
 			if unitsTeleporting == 0 then 
 				self.TeleportingUnits = false
 			else
 				-- each beam fired costs 100 energy and 1 mass per tick
-				CreateEconomyEvent(self, unitsTeleporting * 100 * randTime, unitsTeleporting * randTime, randTime)
+				CreateEconomyEvent(self, unitsTeleporting * 100, unitsTeleporting, 0.5)
 				
 				-- play the teleport bolt sound
 				self:PlayUnitSound('TeleportBolt')
 			end
 			
-			WaitSeconds(randTime)
+			WaitSeconds(0.5)
 		end
-		self:DestroyEmitters(beamFx)
-		self:DestroyEmitters(firedBeams)
+		self:DestroyEmitters(self.beamFx)
+		self:DestroyEmitters(self.firedBeams)
 	end,
 	
 	IsValidUnit = function(self, u)

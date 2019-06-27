@@ -43,6 +43,11 @@ UnitBlueprint {
 			Cue = 'TeleTowerWav',
 			LodCutoff = 'UnitMove_LodCutoff',
 		},
+		TeleportSend = Sound {
+			Bank = 'XAB',
+            Cue = 'XAB1401_Activate',
+            LodCutoff = 'UnitMove_LodCutoff',
+		},
     },
     BuildIconSortPriority = 70,
     Categories = {
@@ -171,9 +176,9 @@ UnitBlueprint {
         UniformScale = 0.1,
     },
     Economy = {
-        BuildCostEnergy = 57600,
-        BuildCostMass = 3240,
-        BuildTime = 5400,
+        BuildCostEnergy = 112000,
+        BuildCostMass = 30000,
+        BuildTime = 30000,
         RebuildBonusIds = {
             'psb1301',
         },
@@ -204,7 +209,7 @@ UnitBlueprint {
         Icon = 'land',
         SelectionPriority = 5,
         TechLevel = 'RULEUTL_Secret',
-        UnitName = '<LOC psb1301_name>Teleport Tower',
+        UnitName = '<LOC psb1301_name>YThana',
         UnitWeight = 1,
     },
     Intel = {
@@ -251,9 +256,9 @@ UnitBlueprint {
     StrategicIconSortPriority = 240,
     Weapon = {
         {
-            Damage = 8000,
+            Damage = 6000,
             DamageFriendly = true,
-            DamageRadius = 10,
+            DamageRadius = 5,
             DamageType = 'Normal',
             DisplayName = 'Death Weapon',
             DummyWeapon = true,
