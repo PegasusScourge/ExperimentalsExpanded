@@ -1,0 +1,6 @@
+UnitBlueprint {
+    BlueprintId="XRL0302",Merge=true,
+	Categories = {
+		'SHOULDNOTTELEPORT',
+	},
+}

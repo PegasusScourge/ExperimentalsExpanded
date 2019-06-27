@@ -24,10 +24,10 @@ BasicEquipment = Class(Entity)
 		-- explain what we have
 		LOG('Basic equipment attached, here are the values and information available on the Entity we were attached to')
 		LOG('Attached to ' .. string.format("%s", tostring(spec.AttachBone)))
-		LOG('Members:')
-		for key,value in pairs(Entity) do
-			LOG("found member " .. key .. ' with value ' .. string.format("%s", tostring(value)));
-		end
+		#LOG('Members:')
+		#for key,value in pairs(Entity) do
+		#	LOG("found member " .. key .. ' with value ' .. string.format("%s", tostring(value)));
+		#end
     end,
 
     OnDestroy = function(self)
@@ -51,13 +51,13 @@ MicroTeleporter = Class(BasicEquipment)
 		local teleporterLocation = teleporter:GetPosition()
 		location[2] = teleporterLocation[2] -- put ourselves on a level playing field for all intents and purposes. For some reason the 2D distance calc sometimes takes this into effect???
 		
-		print('Teleporter intercepted, to (' .. location[1] .. ',' .. location[2] .. ',' .. location[3] .. ')')
-		print('Teleporter intercepted, from (' .. teleporterLocation[1] .. ',' .. teleporterLocation[2] .. ',' .. teleporterLocation[3] .. ')')
+		#print('Teleporter intercepted, to (' .. location[1] .. ',' .. location[2] .. ',' .. location[3] .. ')')
+		#print('Teleporter intercepted, from (' .. teleporterLocation[1] .. ',' .. teleporterLocation[2] .. ',' .. teleporterLocation[3] .. ')')
 		
 		-- check if the distance is within the allowed teleport range
 		local dist = VDist2(location[1], location[3], teleporterLocation[1], teleporterLocation[3])
 		
-		print('Teleport intercepted, dist = ' .. dist)
+		#print('Teleport intercepted, dist = ' .. dist)
 		
 		if dist < self.TeleportRange then 
 			return true
