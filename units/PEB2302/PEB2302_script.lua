@@ -11,7 +11,7 @@
 # PEGASUS SCOURGE EDIT FOR ARK UNIT CANNON
 
 local TStructureUnit = import('/lua/terranunits.lua').TStructureUnit
-local UnitCannonW = import('/mods/ExperimentalsExpanded/lua/unitcannonweapons.lua').UnitCannonWeapon
+local UnitCannonW = import('/mods/ExperimentalsExpanded/lua/ExperimentalsExpandedWeapons.lua').UnitCannonWeapon
 
 local Unit = import('/lua/sim/Unit.lua').Unit
 
