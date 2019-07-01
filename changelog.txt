@@ -2,6 +2,7 @@
 
 Units:
 	- Made Ilshavoh Mk.II drag-buildable
+	- Increased cost of Teleport Tower from (30000, 112000) to (48000, 151000)
 	
 General:
 	- Added changelog
