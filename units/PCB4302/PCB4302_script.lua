@@ -170,6 +170,8 @@ local StrategicMissileRedirect = Class(Entity)
 					proj:TrackTarget(true)
 					
 					local finalApproach = false
+					local redirectMaxTime = 50 -- after this many seconds of redirecting, force a terminal descent
+					local redirectAtTime = GetGameTimeSeconds()
 					while not proj:BeenDestroyed() do
 						
 						if proj.MoveThread then
@@ -178,7 +180,8 @@ local StrategicMissileRedirect = Class(Entity)
 							#print('Caught NUKE GUIDANCE THREAD')
 						end
 						
-						if proj:GetDistanceToTarget() < 40 or finalApproach then
+						-- after redirectMaxTime seconds, force the missile to enter final approach
+						if proj:GetDistanceToTarget() < 40 or finalApproach or GetGameTimeSeconds() > (redirectAtTime + redirectMaxTime) then
 							if not finalApproach then
 								finalApproach = true
 							end
