@@ -1,0 +1,7 @@
+[VERSION 2.50]
+
+Units:
+	- Made Ilshavoh Mk.II drag-buildable
+	
+General:
+	- Added changelog
