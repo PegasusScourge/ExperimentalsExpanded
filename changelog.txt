@@ -2,7 +2,15 @@
 
 Units:
 	- Made Ilshavoh Mk.II drag-buildable
-	- Increased cost of Teleport Tower from (30000, 112000) to (48000, 151000)
+	- Increased cost of Teleport Tower
+		Mass: 		30000 	--> 48000
+		Energy:		112000	-->	151000
+		Build Time:	30000	--> 80000
+	- Loyalty Cannon
+		- Added manual targeting
+		- Reduced base conversion time to 10 ticks from 25 (extra time is dependant on mass of unit)
+		- Turret yaw speed increased to 80 from 60
+		- Increased poll rate of conversion code
 	
 General:
 	- Added changelog

@@ -41,6 +41,8 @@ PAB2301 = Class(AStructureUnit) {
 	BackRSlider = nil,
 	
 	IsUnpacked = false, -- used to determine if the turret is stowed
+	ChangeTargetForced = false,
+	CurrentTarget = nil,
 	
 	ConvertRotor = nil,
 	AmbientBag = {},
@@ -64,6 +66,7 @@ PAB2301 = Class(AStructureUnit) {
 		
 		self:ForkThread(self.UnpackTurret)
 		self:ForkThread(self.ConvertEnemiesThread)
+		self:ForkThread(self.WatchManualTargettingThread)
 		
 		self.ConvertRotor = CreateEmitterAtEntity(self, self:GetArmy(), self.FxConvert):OffsetEmitter(0, 1, 0):ScaleEmitter(1)
 		self.ConvertRotor:SetEmitterCurveParam('ROTATION_RATE_CURVE', 2, 0)
@@ -82,46 +85,71 @@ PAB2301 = Class(AStructureUnit) {
 		AStructureUnit.OnKilled(self, instigator, type, overkillRatio)
 	end,
 	
+	WatchManualTargettingThread = function(self)
+		-- we check for a target being set to the unit
+		local currentTargetId = nil
+		local newTargetId = nil
+		while not self:BeenDestroyed() do
+			if self:GetTargetEntity() then
+				newTargetId = self:GetTargetEntity():GetEntityId()
+			end
+			if currentTargetId ~= newTargetId and newTargetId ~= nil then
+				-- we have a new, non-nil target
+				self:GetWeaponByLabel('MainGun'):SetTargetEntity(GetEntityById(newTargetId))
+				currentTargetId = newTargetId
+				LOG('LOYALTY CANNON: manual retarget to ' .. currentTargetId)
+				self.ChangeTargetForced = true
+				self.CurrentTarget = currentTargetId
+			end
+			WaitSeconds(0.5)
+		end
+	end,
+	
 	-- This function monitors the maingun and tracks the targets it is firing on, converting them as necessary
 	ConvertEnemiesThread = function(self)
 		#local conversionWeapon = self.Weapons.MainGun
 		
-		local currentTargetId = nil
 		local newTargetId = nil
 		
 		local chargeTime = 0
 		local chargeTimeTarget = 30
 		
+		local bp = self:GetBlueprint()
+		
 		while not self:BeenDestroyed() do -- this thread runs as long as we are alive
-			if self:GetWeaponByLabel('MainGun'):GetCurrentTarget() then
+			if self:GetWeaponByLabel('MainGun'):GetCurrentTarget() or self.ChangeTargetForced then
 				-- we have registered a target, get the id of it to confirm if it is the same or different
 				newTargetId = self:GetWeaponByLabel('MainGun'):GetCurrentTarget():GetEntityId()
+				if not IsUnit(GetEntityById(newTargetId)) then
+					newTargetId = self.CurrentTarget
+				end
+				
 				#LOG('Got a target in range: ' .. newTargetId)
-				if currentTargetId == newTargetId and currentTargetId ~= nil then
+				if self.CurrentTarget == newTargetId and self.CurrentTarget ~= nil and self.ChangeTargetForced ~= true then
 					-- same target, don't change anything
-					chargeTime = chargeTime + 1
+					chargeTime = chargeTime + 0.5
 					if chargeTime > chargeTimeTarget then
 						-- convert the entity to our army
 						chargeTime = 0
 						chargeTimeTarget = 25
 						-- send the unit
-						ChangeUnitArmy(GetEntityById(currentTargetId), self:GetAIBrain():GetArmyIndex())
+						ChangeUnitArmy(GetEntityById(self.CurrentTarget), self:GetAIBrain():GetArmyIndex())
 					else
 						self.ConvertRotor:SetEmitterCurveParam('ROTATION_RATE_CURVE', 10 + math.floor((chargeTime/chargeTimeTarget)*10), math.floor((chargeTime/chargeTimeTarget)*300))
 					end
 				else
 					-- change target to the new one
 					chargeTime = 0
-					currentTargetId = newTargetId
-					chargeTimeTarget = 25 + (GetEntityById(currentTargetId):GetBlueprint().Economy.BuildCostMass/400)
-					LOG('LOYALTY CANNON: Attempting capture of unit with time ' .. chargeTimeTarget)
-					newTargetId = nil
+					self.CurrentTarget = newTargetId
+					chargeTimeTarget = bp.LoyaltyConversion.BaseTime + (GetEntityById(self.CurrentTarget):GetBlueprint().Economy.BuildCostMass/400)
+					LOG('LOYALTY CANNON: Attempting capture of unit ' .. self.CurrentTarget .. ' with time ' .. chargeTimeTarget .. ' ticks. IsUnit:' .. string.format("%s", tostring(IsUnit(GetEntityById(self.CurrentTarget)))))
 				end
+				self.ChangeTargetForced = false
 			else
 				-- we have no current target
 				self.ConvertRotor:SetEmitterCurveParam('ROTATION_RATE_CURVE', 2, 0)
 			end
-			WaitSeconds(0.5)
+			WaitSeconds(0.25)
 		end
 	end,
 	

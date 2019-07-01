@@ -110,7 +110,7 @@ UnitBlueprint {
         Category = 'Defense',
         Classification = 'RULEUC_Weapon',
         CommandCaps = {
-            RULEUCC_Attack = false,
+            RULEUCC_Attack = true,
             RULEUCC_CallTransport = false,
             RULEUCC_Capture = false,
             RULEUCC_Guard = false,
@@ -178,6 +178,9 @@ UnitBlueprint {
         Level4 = 48,
         Level5 = 60,
     },
+	LoyaltyConversion = {
+		BaseTime = 10,
+	},
     Weapon = {
 		{
             AboveWaterTargetsOnly = true,
@@ -256,7 +259,7 @@ UnitBlueprint {
             TurretPitchSpeed = 44,
             TurretYaw = 0,
             TurretYawRange = 180,
-            TurretYawSpeed = 60,
+            TurretYawSpeed = 80,
             Turreted = true,
             WeaponCategory = 'Direct Fire',
             WeaponUnpacks = false,
