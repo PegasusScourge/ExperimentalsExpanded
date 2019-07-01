@@ -54,6 +54,7 @@ UnitBlueprint {
         'BOT',
         'OVERLAYDIRECTFIRE',
 		'OVERLAYCOUNTERINTEL',
+		'DRAGBUILD',
 		'CQUEMOV', --"CQUEMOV" enables the selection and move commands during construction
     },
     CollisionOffsetZ = 0,
