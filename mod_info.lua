@@ -1,6 +1,6 @@
 name = "Experimentals Expanded"
-uid = "24a0c2f6-59b6-489e-a899-6bba02009999"
-version = 2
+uid = "24a0c2f6-59b6-489e-a899-6bba02509999"
+version = 2.5
 copyright = "PegasusScourge"
 description = "Adds various Supreme Commander 2 inspired experimental units and buildings"
 author = "PegasusScourge"

@@ -19,6 +19,7 @@ Units:
 		- Force nuke to enter terminal descent after 80 seconds, hopefully to prevent the hilarious but utterly dissapointing figure-8 bug
 		- Fixed redirect graphic not disappearing at the correct time
 		- General flight improvements of the nuke under redirection
+		- Fixed the launcher death bug that would result in no deflection: now causes the nuke to explode above the base safely
 	
 General:
 	- Added changelog
