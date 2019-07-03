@@ -8,6 +8,7 @@ Units:
 			Mass: 		30000 	--> 48000
 			Energy:		112000	-->	151000
 			Build Time:	30000	--> 80000
+		- Increased death weapon range from 5 to 8
 	- Loyalty Cannon
 		- Added manual targeting
 		- Reduced base conversion time to 10 ticks from 25 (extra time is dependant on mass of unit)
