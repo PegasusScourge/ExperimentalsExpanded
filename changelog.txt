@@ -14,9 +14,11 @@ Units:
 		- Turret yaw speed increased to 80 from 60
 		- Increased poll rate of conversion code
 	- Ark Unit Cannon
-		- Fixed typo of unit description that called the unit the 'Noah' not 'Ark'
+		- Fixed typo of unit description that called the unit the 'Noah' not 'Ark' (what is this Noah thing anyway?)
 	- Boomerang Strategic Missile Defence
-		- Force nuke to enter terminal descent after 50 seconds, hopefully to prevent the hilarious but utterly dissapointing figure-8 bug
+		- Force nuke to enter terminal descent after 80 seconds, hopefully to prevent the hilarious but utterly dissapointing figure-8 bug
+		- Fixed redirect graphic not disappearing at the correct time
+		- General flight improvements of the nuke under redirection
 	
 General:
 	- Added changelog

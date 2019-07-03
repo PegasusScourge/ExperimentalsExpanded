@@ -51,6 +51,9 @@ local StrategicMissileRedirect = Class(Entity)
         self.AttachBone = spec.AttachBone
         self:AttachTo(spec.Owner, spec.AttachBone)
 		
+		-- create a trash bag
+		self.Trash = TrashBag()
+		
         ChangeState(self, self.WaitingState)
         #LOG('*DEBUG MISSILEREDIRECT DONE BEING CREATED')
     end,
@@ -62,6 +65,9 @@ local StrategicMissileRedirect = Class(Entity)
 			
 			self.EnemyProj:Destroy()
 		end
+		if self.Trash then
+            self.Trash:Destroy()
+        end
 	
 		Entity.OnDestroy(self)
         ChangeState(self, self.DeadState)
@@ -119,7 +125,7 @@ local StrategicMissileRedirect = Class(Entity)
 					proj.MoveThread = nil
 				end
 				
-				proj:ForkThread(function()
+				self:ForkThread(function()
 					local projPos = proj:GetPosition()
 					local launcherPos = launcher:GetPosition()
 					local launcherAbove = launcherPos
@@ -130,6 +136,7 @@ local StrategicMissileRedirect = Class(Entity)
 					local flightPath = projPos
 					flightPath[2] = GetSurfaceHeight(projPos[1], projPos[3]) + flightHeight
 					launcherAbove[2] = GetSurfaceHeight(launcherPos[1], launcherPos[3]) + flightHeight
+					launcherPos[2] = launcherPos[2] - 0.02 --put us slightly below the terrain with our aim
 					
 					if launcherPos[1] < projPos[1] then
 						flightPath[1] = flightPath[1] - 20
@@ -163,16 +170,21 @@ local StrategicMissileRedirect = Class(Entity)
 					#print('Boomerang: ascent phase')
 					WaitSeconds(4)
 					
-					
 					#print('Boomerang: cruise phase, tgt height ' .. flightHeight)
 					proj:SetNewTargetGround(launcherAbove)
 					proj:SetTurnRate(47.52)
 					proj:TrackTarget(true)
+					proj:SetAcceleration(0)
 					
 					local finalApproach = false
-					local redirectMaxTime = 50 -- after this many seconds of redirecting, force a terminal descent
+					local redirectMaxTime = 80 -- after this many seconds of redirecting, force a terminal descent
 					local redirectAtTime = GetGameTimeSeconds()
+					local dist = 9999
 					while not proj:BeenDestroyed() do
+						projPos = proj:GetPosition()
+						dist = VDist2(projPos[1], projPos[3], launcherAbove[1], launcherAbove[3])
+						
+						#LOG('DEBUG nuke distance to target: ' .. tostring(dist))
 						
 						if proj.MoveThread then
 							KillThread(proj.MoveThread)
@@ -181,18 +193,18 @@ local StrategicMissileRedirect = Class(Entity)
 						end
 						
 						-- after redirectMaxTime seconds, force the missile to enter final approach
-						if proj:GetDistanceToTarget() < 40 or finalApproach or GetGameTimeSeconds() > (redirectAtTime + redirectMaxTime) then
-							if not finalApproach then
-								finalApproach = true
-							end
+						if dist < 35 or GetGameTimeSeconds() > (redirectAtTime + redirectMaxTime) then
+							finalApproach = true
+							#LOG('DEBUG final approach circumstances met')
+						end
+						if finalApproach == true then
 							proj:SetNewTargetGround(launcherPos)
-							WaitSeconds(0.25)
 							proj:SetTurnRate(47.52)
 						else
 							proj:SetNewTargetGround(launcherAbove)
-							WaitSeconds(0.25)
 							proj:SetTurnRate(55)
 						end
+						WaitSeconds(0.25)
 					end
 				end)
 			end
@@ -208,6 +220,16 @@ local StrategicMissileRedirect = Class(Entity)
 
 		OnCollisionCheck = function(self, other)
 			return false
+		end,
+		
+		ForkThread = function(self, fn, ...)
+			if fn then
+				local thread = ForkThread(fn, self, unpack(arg))
+				self.Trash:Add(thread)
+				return thread
+			else
+				return nil
+			end
 		end,
 	},
 }
