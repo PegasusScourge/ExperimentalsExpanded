@@ -10,5 +10,6 @@ enabled = true
 exclusive = false
 ui_only = false
 conflicts = {
+	"24a0c2f6-59b6-489e-a899-6bba02009999", -- version 2.0 of mod
 	"24a0c2f6-59b6-489e-a899-6bba42999999", -- version 1.0 of the mod
 }

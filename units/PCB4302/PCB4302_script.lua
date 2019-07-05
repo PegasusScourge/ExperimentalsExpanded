@@ -35,6 +35,12 @@ local StrategicMissileRedirect = Class(Entity)
 	
 	RedirectBeams = {'/effects/emitters/particle_cannon_beam_01_emit.bp', '/effects/emitters/particle_cannon_beam_02_emit.bp'},
     EndPointEffects = {'/effects/emitters/particle_cannon_end_01_emit.bp',},
+	RedirectEffects = {
+		'/effects/emitters/teleport_ring_01_emit.bp',
+		'/effects/emitters/proton_artillery_muzzle_04_emit.bp',
+		'/effects/emitters/disintegrator_hit_sparks_01_emit.bp',
+		'/effects/emitters/cannon_muzzle_flash_09_emit.bp',
+	},
     
     #AttachBone = function( AttachBone )
     #    self:AttachTo(spec.Owner, self.AttachBone)
@@ -97,13 +103,20 @@ local StrategicMissileRedirect = Class(Entity)
 				return
 			end
 			
-			-- create particles
-			local activeBeams = {}
+			-- create beam
+			local activeEffects = {}
 		
 			for k, v in self.RedirectBeams do
-				table.insert(activeBeams, AttachBeamEntityToEntity(self.EnemyProj, -1, self.Owner, self.AttachBone, self:GetArmy(), v))
+				table.insert(activeEffects, AttachBeamEntityToEntity(self.EnemyProj, -1, self.Owner, self.AttachBone, self:GetArmy(), v))
 			end
-			#self.Trash:Add(activeBeams)
+			-- create ending
+			for k, v in self.EndPointEffects do
+				table.insert(activeEffects, CreateAttachedEmitter(self.EnemyProj, nil, self:GetArmy(), v))
+			end
+			-- create redirection effects
+			for k, v in self.RedirectEffects do
+				table.insert(activeEffects, CreateAttachedEmitter(self, nil, self:GetArmy(), v):ScaleEmitter(2.0))
+			end
 
 			if self.Enemy then
 				-- Set collision to friends active so that when the missile reaches its source it can deal damage.
@@ -173,10 +186,10 @@ local StrategicMissileRedirect = Class(Entity)
 					proj:SetTurnRate(47.52)
 					proj:TrackTarget(true)
 					
-					print('Boomerang: ascent phase')
+					#print('Boomerang: ascent phase')
 					WaitSeconds(4)
 					
-					print('Boomerang: cruise phase, tgt height ' .. flightHeight)
+					#print('Boomerang: cruise phase, tgt height ' .. flightHeight)
 					proj:SetNewTargetGround(launcherAbove)
 					proj:SetTurnRate(47.52)
 					proj:TrackTarget(true)
@@ -190,8 +203,8 @@ local StrategicMissileRedirect = Class(Entity)
 						projPos = proj:GetPosition()
 						dist = VDist2(projPos[1], projPos[3], launcherAbove[1], launcherAbove[3])
 						
-						LOG('DEBUG nuke distance to target: ' .. tostring(dist))
-						print('DEBUG nuke distance to target: ' .. tostring(dist))
+						#LOG('DEBUG nuke distance to target: ' .. tostring(dist))
+						#print('DEBUG nuke distance to target: ' .. tostring(dist))
 						
 						if proj.MoveThread then
 							KillThread(proj.MoveThread)
@@ -202,8 +215,8 @@ local StrategicMissileRedirect = Class(Entity)
 						-- after redirectMaxTime seconds, force the missile to enter final approach
 						if dist < 35 or GetGameTimeSeconds() > (redirectAtTime + redirectMaxTime) then
 							finalApproach = true
-							LOG('DEBUG final approach circumstances met')
-							print('DEBUG final approach circumstances met')
+							#LOG('DEBUG final approach circumstances met')
+							#print('DEBUG final approach circumstances met')
 						end
 						if finalApproach == true and launcher ~= self then
 							proj:SetNewTarget(launcher)
@@ -218,8 +231,8 @@ local StrategicMissileRedirect = Class(Entity)
 			end
 
 			WaitSeconds(1 / self.RedirectRateOfFire)
-			-- make sure we release beams we own
-			for k, v in activeBeams do
+			-- make sure we release effects we own
+			for k, v in activeEffects do
 				v:Destroy()
 			end
 
