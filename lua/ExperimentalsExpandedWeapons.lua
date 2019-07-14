@@ -2,9 +2,32 @@ local WeaponFile = import('/lua/sim/DefaultWeapons.lua')
 local DefaultProjectileWeapon = WeaponFile.DefaultProjectileWeapon
 local DefaultBeamWeapon = WeaponFile.DefaultBeamWeapon
 local CollisionBeamFile = import('/lua/defaultcollisionbeams.lua')
-local EffectTemplate = import('/mods/ExperimentalsExpanded/lua/ArkEffectTemplates.lua')
+local AEffEffectTemplate = import('/mods/ExperimentalsExpanded/lua/ArkEffectTemplates.lua')
 
 local Weapon = import('/lua/sim/Weapon.lua').Weapon
+
+#**********************
+# Boomerang Redirect Beam
+#**********************
+BoomerangCollisionBeam = Class(CollisionBeamFile.SCCollisionBeam) {
+    
+    FxBeam = {'/effects/emitters/particle_cannon_beam_02_emit.bp'},
+    FxBeamEndPoint = { 
+        '/effects/emitters/particle_cannon_end_01_emit.bp',
+    },
+    FxBeamEndPointScale = 1.0,
+    
+    FxBeamStartPoint = { 
+        '/effects/emitters/teleport_ring_01_emit.bp',
+		'/effects/emitters/proton_artillery_muzzle_04_emit.bp',
+		'/effects/emitters/disintegrator_hit_sparks_01_emit.bp',
+		'/effects/emitters/cannon_muzzle_flash_09_emit.bp', 
+    },
+}
+
+BoomerangCollisionBeamWeapon = Class(DefaultBeamWeapon) {
+	BeamType = BoomerangCollisionBeam,
+}
 
 #**********************
 # Aeon Loyalty Weapon
@@ -19,7 +42,7 @@ ConversionWeapon = Class(DefaultBeamWeapon) {
 #**********************
 
 UnitCannonWeapon = Class(DefaultProjectileWeapon) {
-    FxMuzzleFlash = EffectTemplate.TIFArtilleryMuzzleFlash,
+    FxMuzzleFlash = AEffEffectTemplate.TIFArtilleryMuzzleFlash,
 	
 	VariableTable = {},
 	UnitTable = {},
